@@ -11,5 +11,5 @@ $ python manage.py runserver
 // To make other apps:
 $ python manage.py startapp {appname}
 
-          Feedback And Grievance Readressal System
+    Feedback And Grievance Readressal System
 Team Project
