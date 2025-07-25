@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departments - {{ municipality.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Departments in {{ municipality.name }}</h1>
+    <a href="{% url 'base:home' %}">Back to Home</a>
+    <ul>
+        {% for department in departments %}
+            <li>
+                {{ department.name }}
+                <a href="{% url 'base:feedback_create' department.id %}">[Provide Feedback]</a>
+                <a href="{% url 'base:grievance_create' department.id %}">[Submit Grievance]</a>
+            </li>
+        {% empty %}
+            <li>No departments found for this municipality.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

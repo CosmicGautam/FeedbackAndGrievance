@@ -1,18 +1,112 @@
-{% extends 'main.html' %}
-
-{% block content %}
-
-<h1>Home Template</h1>
-
-<div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Governance Portal - Home</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        select { margin: 10px 0; padding: 5px; width: 200px; }
+        #municipalities { margin-top: 10px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the E-Governance Portal</h1>
+    <h2>Select a State and Municipality</h2>
+    {% if user.is_authenticated %}
+        <p>Logged in as {{ user.username }} | <a href="{% url 'base:login' %}">Logout</a></p>
+        {% if user.groups.all.0.name == 'Officials' %}
+            <p><a href="{% url 'base:grievance_list' %}">View All Grievances</a></p>
+        {% endif %}
+    {% else %}
+        <p><a href="{% url 'base:login' %}">Login</a> | <a href="{% url 'base:register' %}">Register</a></p>
+    {% endif %}
     <div>
-        {% for department in departments %}
-            <div>
-                <h5>{{department.id}} --<a href="{% url 'department' department.id %}"> {{department.name}}</a></h5>
-            </div>
-        {% endfor %}
+        <label for="state-select">State:</label>
+        <select id="state-select" onchange="updateMunicipalities()">
+            <option value="">Select a state</option>
+            {% for state in states %}
+                <option value="{{ state.id }}" data-municipalities='[
+                    {% for municipality in state.municipalities.all %}
+                        {"id": {{ municipality.id }}, "name": "{{ municipality.name | escapejs }}"} {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]'>{{ state.name }}</option>
+            {% endfor %}
+        </select>
     </div>
-</div>
+    <div>
+        <label for="municipality-select">Municipality:</label>
+        <select id="municipality-select" onchange="updateMunicipalityLink()">
+            <option value="">Select a municipality</option>
+        </select>
+    </div>
+    <div id="municipalities">
+        <p>Select a state and municipality to view departments.</p>
+    </div>
 
+    <script>
+        function updateMunicipalities() {
+            const stateSelect = document.getElementById('state-select');
+            const municipalitySelect = document.getElementById('municipality-select');
+            const municipalitiesDiv = document.getElementById('municipalities');
+            const selectedOption = stateSelect.options[stateSelect.selectedIndex];
 
-{% endblock content %}
+            municipalitySelect.innerHTML = '<option value="">Select a municipality</option>';
+
+            if (selectedOption.value) {
+                try {
+                    const municipalities = JSON.parse(selectedOption.getAttribute('data-municipalities'));
+                    console.log('Municipalities for state ID', selectedOption.value, ':', municipalities);
+                    if (municipalities.length > 0) {
+                        municipalities.forEach(m => {
+                            if (m.id > 0) {
+                                const option = document.createElement('option');
+                                option.value = m.id;
+                                option.text = m.name;
+                                municipalitySelect.appendChild(option);
+                            }
+                        });
+                        municipalitySelect.disabled = false;
+                        municipalitiesDiv.innerHTML = '<p>Select a municipality to view its departments.</p>';
+                    } else {
+                        municipalitiesDiv.innerHTML = '<p>No municipalities found for this state.</p>';
+                        municipalitySelect.disabled = true;
+                    }
+                } catch (e) {
+                    console.error('Error parsing municipalities:', e);
+                    municipalitiesDiv.innerHTML = '<p class="error">Error loading municipalities.</p>';
+                    municipalitySelect.disabled = true;
+                }
+            } else {
+                municipalitySelect.disabled = true;
+                municipalitiesDiv.innerHTML = '<p>Select a state to view its municipalities.</p>';
+            }
+        }
+
+        function updateMunicipalityLink() {
+            const municipalitySelect = document.getElementById('municipality-select');
+            const municipalitiesDiv = document.getElementById('municipalities');
+            const selectedMunicipalityId = municipalitySelect.value;
+
+            console.log('Selected municipality ID:', selectedMunicipalityId);
+
+            if (selectedMunicipalityId && Number(selectedMunicipalityId) > 0) {
+                const municipalityName = municipalitySelect.options[municipalitySelect.selectedIndex].text;
+                const url = "{% url 'base:department_list' 999 %}".replace('999', selectedMunicipalityId);
+                municipalitiesDiv.innerHTML = `
+                    <p>
+                        <a href="${url}" onclick="console.log('Navigating to:', '${url}')">View departments for ${municipalityName}</a>
+                    </p>
+                `;
+            } else {
+                console.log('Invalid or no municipality selected');
+                municipalitiesDiv.innerHTML = '<p class="error">Please select a valid municipality.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
