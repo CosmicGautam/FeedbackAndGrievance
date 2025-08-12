@@ -1,151 +1,22 @@
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http import Http404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.models import Group
-from .models import State, Municipality, Department, Feedback, Grievance, GrievanceResponse
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .models import Feedback, Grievance, GrievanceResponse, Municipality, Department
+from .serializers import FeedbackSerializer, GrievanceSerializer
 import logging
 
-# Set up logging
 logger = logging.getLogger(__name__)
-
-class HomeView(ListView):
-    model = State
-    template_name = 'base/home.html'
-    context_object_name = 'states'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['states'] = State.objects.prefetch_related('municipalities').all()
-        logger.debug('Fetched states: %s', context['states'])
-        return context
-
-class DepartmentListView(ListView):
-    model = Department
-    template_name = 'base/department_list.html'
-    context_object_name = 'departments'
-
-    def get_queryset(self):
-        try:
-            municipality_id = self.kwargs['pk']
-            logger.debug(f"Fetching departments for municipality ID: {municipality_id}")
-            municipality = Municipality.objects.get(id=municipality_id)
-            return Department.objects.filter(municipality_id=municipality_id).select_related('municipality')
-        except Municipality.DoesNotExist:
-            logger.error(f"Municipality with ID {municipality_id} does not exist")
-            raise Http404("Municipality does not exist")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        try:
-            context['municipality'] = Municipality.objects.get(id=self.kwargs['pk'])
-        except Municipality.DoesNotExist:
-            logger.error(f"Municipality with ID {self.kwargs['pk']} does not exist for context")
-            raise Http404("Municipality does not exist")
-        return context
-
-class FeedbackCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Feedback
-    fields = ['rating', 'comment']
-    template_name = 'base/feedback_grievance.html'
-    permission_required = 'base.add_feedback'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['department'] = Department.objects.get(id=self.kwargs['pk'])
-        context['form_type'] = 'feedback'
-        return context
-
-    def form_valid(self, form):
-        if not self.request.user.groups.filter(name='Citizens').exists():
-            raise Http404("Only citizens can submit feedback")
-        form.instance.user = self.request.user
-        form.instance.department_id = self.kwargs['pk']
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('base:department_list', kwargs={'pk': self.object.department.municipality_id})
-
-class GrievanceCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = Grievance
-    fields = ['title', 'description']
-    template_name = 'base/feedback_grievance.html'
-    permission_required = 'base.add_grievance'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['department'] = Department.objects.get(id=self.kwargs['pk'])
-        context['form_type'] = 'grievance'
-        return context
-
-    def form_valid(self, form):
-        if not self.request.user.groups.filter(name='Citizens').exists():
-            raise Http404("Only citizens can submit grievances")
-        form.instance.user = self.request.user
-        form.instance.department_id = self.kwargs['pk']
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('base:department_list', kwargs={'pk': self.object.department.municipality_id})
-
-class GrievanceListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    model = Grievance
-    template_name = 'base/grievance_list.html'
-    context_object_name = 'grievances'
-    permission_required = 'base.view_grievance'
-
-    def get_queryset(self):
-        if not self.request.user.groups.filter(name='Officials').exists():
-            raise Http404("Only officials can view grievances")
-        return Grievance.objects.all().select_related('user', 'department')
-
-class GrievanceDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    model = Grievance
-    template_name = 'base/grievance_detail.html'
-    permission_required = 'base.view_grievance'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['responses'] = self.object.responses.all()
-        context['is_official'] = self.request.user.groups.filter(name='Officials').exists()
-        return context
-
-class GrievanceResponseCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    model = GrievanceResponse
-    fields = ['response']
-    template_name = 'base/grievance_response_form.html'
-    permission_required = 'base.add_grievanceresponse'
-
-    def form_valid(self, form):
-        if not self.request.user.groups.filter(name='Officials').exists():
-            raise Http404("Only officials can respond to grievances")
-        form.instance.user = self.request.user
-        form.instance.grievance_id = self.kwargs['grievance_id']
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('base:grievance_detail', kwargs={'pk': self.kwargs['grievance_id']})
-
-class GrievanceStatusUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = Grievance
-    fields = ['status']
-    template_name = 'base/grievance_status_form.html'
-    permission_required = 'base.change_grievance'
-
-    def form_valid(self, form):
-        if not self.request.user.groups.filter(name='Officials').exists():
-            raise Http404("Only officials can update grievance status")
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('base:grievance_detail', kwargs={'pk': self.kwargs['pk']})
 
 class RegisterView(CreateView):
     form_class = UserCreationForm
     template_name = 'base/register.html'
-    success_url = reverse_lazy('base:home')
+    success_url = reverse_lazy('admin:index')
 
     def form_valid(self, form):
         user = form.save()
@@ -153,3 +24,106 @@ class RegisterView(CreateView):
         user.groups.add(citizen_group)
         login(self.request, user)
         return super().form_valid(form)
+
+class FeedbackAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, municipality_id, department_id):
+        if not request.user.groups.filter(name='Citizens').exists():
+            logger.error(f"User {request.user.username} not in Citizens group")
+            return Response({"error": "Only citizens can submit feedback"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            data = request.data.copy()
+            data['municipality'] = municipality_id
+            data['department'] = department_id
+            serializer = FeedbackSerializer(data=data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                logger.debug(f"Feedback saved for user {request.user.username}, department ID {department_id}, municipality ID {municipality_id}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.error(f"Feedback invalid: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error saving feedback: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class GrievanceAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, municipality_id, department_id):
+        if not request.user.groups.filter(name='Citizens').exists():
+            logger.error(f"User {request.user.username} not in Citizens group")
+            return Response({"error": "Only citizens can submit grievances"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            data = request.data.copy()
+            data['municipality'] = municipality_id
+            data['department'] = department_id
+            serializer = GrievanceSerializer(data=data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                logger.debug(f"Grievance saved for user {request.user.username}, department ID {department_id}, municipality ID {municipality_id}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.error(f"Grievance invalid: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error saving grievance: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class GrievanceListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.groups.filter(name='Officials').exists():
+            logger.error(f"User {request.user.username} not in Officials group")
+            return Response({"error": "Only officials can view grievances"}, status=status.HTTP_403_FORBIDDEN)
+        grievances = Grievance.objects.all().select_related('user', 'department', 'municipality')
+        serializer = GrievanceSerializer(grievances, many=True)
+        logger.debug(f"Grievances fetched for user {request.user.username}: {list(grievances.values('id', 'title', 'status', 'municipality__name'))}")
+        return Response(serializer.data)
+
+class GrievanceResponseAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, grievance_id):
+        if not request.user.groups.filter(name='Officials').exists():
+            logger.error(f"User {request.user.username} not in Officials group")
+            return Response({"error": "Only officials can respond to grievances"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            grievance = Grievance.objects.get(id=grievance_id)
+            response = GrievanceResponse.objects.create(
+                user=request.user,
+                grievance=grievance,
+                response=request.data.get('response')
+            )
+            logger.debug(f"Grievance response saved for grievance ID {grievance_id} by user {request.user.username}")
+            return Response({"id": response.id, "response": response.response}, status=status.HTTP_201_CREATED)
+        except Grievance.DoesNotExist:
+            logger.error(f"Grievance with ID {grievance_id} does not exist")
+            return Response({"error": "Grievance does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error saving grievance response: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class GrievanceStatusUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        if not request.user.groups.filter(name='Officials').exists():
+            logger.error(f"User {request.user.username} not in Officials group")
+            return Response({"error": "Only officials can update grievance status"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            grievance = Grievance.objects.get(id=pk)
+            status = request.data.get('status')
+            if status in [choice[0] for choice in Grievance.STATUS_CHOICES]:
+                grievance.status = status
+                grievance.save()
+                logger.debug(f"Grievance status updated for ID {pk} to {status} by user {request.user.username}")
+                return Response({"id": grievance.id, "status": grievance.status}, status=status.HTTP_200_OK)
+            logger.error(f"Invalid status: {status}")
+            return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
+        except Grievance.DoesNotExist:
+            logger.error(f"Grievance with ID {pk} does not exist")
+            return Response({"error": "Grievance does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error updating grievance status: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if form_type == 'feedback' %}Provide Feedback{% else %}Submit Grievance{% endif %}</title>
+    <title>Respond to Grievance - E-Governance Portal</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,15 +13,15 @@
             color: #333;
         }
         form {
-            max-width: 600px;
+            max-width: 500px;
         }
         label {
             display: block;
             margin: 10px 0 5px;
         }
-        input, textarea, select {
+        textarea {
             width: 100%;
-            padding: 8px;
+            padding: 5px;
             margin-bottom: 10px;
         }
         button {
@@ -34,26 +34,22 @@
         button:hover {
             background-color: #0056b3;
         }
-        .errorlist {
+        .error {
             color: red;
         }
     </style>
 </head>
 <body>
-    <h1>
-        {% if form_type == 'feedback' %}
-            Provide Feedback for {{ department.name }} (Municipality ID: {{ municipality_id }})
-        {% else %}
-            Submit Grievance for {{ department.name }} (Municipality ID: {{ municipality_id }})
-        {% endif %}
-    </h1>
-    <form method="post">
+    <h1>Respond to Grievance: {{ grievance.title }}</h1>
+    {% if form.errors %}
+        <p class="error">Please correct the errors below:</p>
+        {{ form.errors }}
+    {% endif %}
+    <form method="post" action="{% url 'base:grievance_response_create' grievance.id %}">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Submit</button>
+        <button type="submit">Submit Response</button>
     </form>
-    <p>
-        <a href="{% url 'base:department_list' pk=municipality_id %}">Back to Departments</a>
-    </p>
+    <p><a href="{% url 'base:grievance_detail' grievance.id %}">Back to Grievance</a></p>
 </body>
 </html>

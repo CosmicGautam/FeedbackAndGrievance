@@ -15,25 +15,26 @@ class Municipality(models.Model):
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
-    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, null=True)
+    municipalities = models.ManyToManyField(Municipality, related_name='departments')
     created = models.DateTimeField(default=timezone.now)
-    updated = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.name
 
 class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     class Meta:
-        pass  # Remove custom permissions; use built-in 'add_feedback'
+        pass
 
 class Grievance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
@@ -45,7 +46,7 @@ class Grievance(models.Model):
         ('CLOSED', 'Closed')
     ], default='OPEN')
     class Meta:
-        pass  # Remove custom permissions; use built-in 'add_grievance', 'view_grievance', 'change_grievance'
+        pass
 
 class GrievanceResponse(models.Model):
     grievance = models.ForeignKey(Grievance, on_delete=models.CASCADE, related_name='responses')
@@ -54,4 +55,4 @@ class GrievanceResponse(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     class Meta:
-        pass  # Remove custom permissions; use built-in 'add_grievanceresponse'
+        pass

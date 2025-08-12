@@ -12,13 +12,21 @@
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
         .error { color: red; }
+        form.logout-form { display: inline; }
+        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
     <h1>Welcome to the E-Governance Portal</h1>
     <h2>Select a State and Municipality</h2>
     {% if user.is_authenticated %}
-        <p>Logged in as {{ user.username }} | <a href="{% url 'base:login' %}">Logout</a></p>
+        <p>Logged in as {{ user.username }} | 
+           <form class="logout-form" method="post" action="{% url 'base:logout' %}">
+               {% csrf_token %}
+               <button type="submit">Logout</button>
+           </form>
+        </p>
         {% if user.groups.all.0.name == 'Officials' %}
             <p><a href="{% url 'base:grievance_list' %}">View All Grievances</a></p>
         {% endif %}

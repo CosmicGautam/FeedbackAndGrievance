@@ -3,42 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grievance List</title>
+    <title>Grievance List - E-Governance Portal</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>Grievance List</h1>
-    <a href="{% url 'base:home' %}">Back to Home</a>
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>User</th>
-            <th>Department</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        {% for grievance in grievances %}
-            <tr>
-                <td>{{ grievance.title }}</td>
-                <td>{{ grievance.user.username }}</td>
-                <td>{{ grievance.department.name }}</td>
-                <td>{{ grievance.get_status_display }}</td>
-                <td>
-                    <a href="{% url 'base:grievance_detail' grievance.id %}">View</a> |
-                    <a href="{% url 'base:grievance_status_update' grievance.id %}">Update Status</a> |
-                    <a href="{% url 'base:grievance_response_create' grievance.id %}">Respond</a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="5">No grievances found.</td></tr>
-        {% endfor %}
-    </table>
+    {% if grievances %}
+        <ul>
+            {% for grievance in grievances %}
+                <li>
+                    <strong>{{ grievance.title }}</strong> ({{ grievance.status }})<br>
+                    Submitted by {{ grievance.user.username }} on {{ grievance.created|date:"Y-m-d H:i" }}<br>
+                    Department: {{ grievance.department.name }} ({{ grievance.department.municipality.name }})<br>
+                    <a href="{% url 'base:grievance_detail' grievance.id %}">View Details</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="error">No grievances found.</p>
+    {% endif %}
+    <p><a href="{% url 'base:home' %}">Back to Home</a></p>
 </body>
 </html>

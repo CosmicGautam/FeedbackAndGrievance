@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grievance Details - E-Governance Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .grievance-info, .response {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grievance: {{ grievance.title }}</h1>
+    <div class="grievance-info">
+        <p><strong>Status:</strong> {{ grievance.status }}</p>
+        <p><strong>Submitted by:</strong> {{ grievance.user.username }}</p>
+        <p><strong>Department:</strong> {{ grievance.department.name }} ({{ grievance.department.municipality.name }})</p>
+        <p><strong>Created:</strong> {{ grievance.created|date:"Y-m-d H:i" }}</p>
+        <p><strong>Updated:</strong> {{ grievance.updated|date:"Y-m-d H:i" }}</p>
+        <p><strong>Description:</strong> {{ grievance.description }}</p>
+    </div>
+    {% if is_official %}
+        <p><a href="{% url 'base:grievance_response_create' grievance.id %}">Add Response</a></p>
+        <p><a href="{% url 'base:grievance_status_update' grievance.id %}">Update Status</a></p>
+    {% endif %}
+    <h2>Responses</h2>
+    {% if responses %}
+        {% for response in responses %}
+            <div class="response">
+                <p><strong>{{ response.user.username }}</strong> on {{ response.created|date:"Y-m-d H:i" }}:</p>
+                <p>{{ response.response }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No responses yet.</p>
+    {% endif %}
+    <p><a href="{% url 'base:grievance_list' %}">Back to Grievance List</a></p>
+</body>
+</html>
