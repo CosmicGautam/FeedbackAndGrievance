@@ -2442,3 +2442,110 @@ Not Found: /favicon.ico
 Watching for file changes with StatReloader
 C:\Cosmic\Project\FeedbackAndGrievance\base\urls.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /
+C:\Cosmic\Project\FeedbackAndGrievance\FnG\settings.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\models.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/provinces.json HTTP/1.1" 200 112
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/bagmati.json HTTP/1.1" 404 14
+Not Found: /api/municipality
+Not Found: /favicon.ico
+Not Found: /api/provinces/
+Not Found: /favicon.ico
+Not Found: /api/provinces/
+Not Found: /
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Not Found: /api/provinces
+Not Found: /api/municipalities/
+Not Found: /favicon.ico
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\urls.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\serializers.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Cosmic\Project\FeedbackAndGrievance\base\views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Not Found: /api/municipality/
+Not Found: /api/municipality
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/provinces.json HTTP/1.1" 200 112
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/bagmati.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/sudurpaschim.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/lumbini.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/pradesh-1.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/madhesh.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/gandaki.json HTTP/1.1" 404 14
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /bimalstha23/Nepal-Address-API/main/data/districts/karnali.json HTTP/1.1" 404 14
+Not Found: /favicon.ico
+C:\Cosmic\Project\FeedbackAndGrievance\base\views.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Starting new HTTPS connection (1): raw.githubusercontent.com:443
+https://raw.githubusercontent.com:443 "GET /nepalutils/geodata/main/data/provinces.json HTTP/1.1" 404 14
+Not Found: /favicon.ico
+C:\Cosmic\Project\FeedbackAndGrievance\base\migrations\0005_auto_20250817_2010.py changed, reloading.
+Watching for file changes with StatReloader
+Not Found: /favicon.ico

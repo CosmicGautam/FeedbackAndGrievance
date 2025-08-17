@@ -7,11 +7,32 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Feedback, Grievance, GrievanceResponse, Municipality, Department
+from .models import Feedback, Grievance, GrievanceResponse, Municipality
 from .serializers import FeedbackSerializer, GrievanceSerializer
 import logging
+from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+from .serializers import StateSerializer, MunicipalitySerializer
+from .models import State, Municipality
 
 logger = logging.getLogger(__name__)
+
+
+class StateViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = State.objects.all()
+    serializer_class = StateSerializer
+    permission_classes = [AllowAny]
+
+class MunicipalityViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Municipality.objects.all()
+    serializer_class = MunicipalitySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        state_id = self.request.query_params.get('state')
+        if state_id:
+            return Municipality.objects.filter(state_id=state_id)
+        return Municipality.objects.all()
 
 class RegisterView(CreateView):
     form_class = UserCreationForm

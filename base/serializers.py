@@ -4,12 +4,12 @@ from .models import State, Municipality, Department, Feedback, Grievance, Grieva
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = '__all__'
+        fields = ['id','name']
 
 class MunicipalitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Municipality
-        fields = '__all__'
+        fields = ['id', 'name']
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:

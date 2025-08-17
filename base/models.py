@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-class State(models.Model):
+class State(models.Model):  # Kept as State
     name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
