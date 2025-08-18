@@ -7,11 +7,11 @@ app_name = 'base'
 
 router = DefaultRouter()
 router.register(r'provinces', StateViewSet)
-router.register(r'municipalities',MunicipalityViewSet)
+router.register(r'municipalities', MunicipalityViewSet)
 
 urlpatterns = [
-    path('api/',include(router.urls)),
-    path('register/', views.RegisterView.as_view(), name='register'),
+    path('api/', include(router.urls)),
+    path('api/register/', views.CustomRegisterView.as_view(), name='register'),  # Updated to use CustomRegisterView
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/municipalities/<int:municipality_id>/departments/<int:department_id>/feedback/', views.FeedbackAPIView.as_view(), name='feedback_api'),

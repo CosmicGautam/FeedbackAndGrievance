@@ -1,32 +1,31 @@
 from rest_framework import serializers
-from .models import State, Municipality, Department, Feedback, Grievance, GrievanceResponse
+from .models import State, Municipality, Feedback, Grievance, GrievanceResponse
+from django.contrib.auth.models import User
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['id','name']
+        fields = ['id', 'name']
 
 class MunicipalitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Municipality
         fields = ['id', 'name']
 
-class DepartmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Department
-        fields = '__all__'
-
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
-        fields = '__all__'
+        fields = ['id', 'rating', 'comment', 'municipality', 'department', 'user']
+        read_only_fields = ['user']
 
 class GrievanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grievance
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'status', 'municipality', 'department', 'user']
+        read_only_fields = ['user', 'status']
 
 class GrievanceResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceResponse
-        fields = '__all__'
+        fields = ['id', 'response', 'grievance', 'user']
+        read_only_fields = ['user']
