@@ -1,4 +1,5 @@
-        -----BASIC SETUP------
+                -----BASIC SETUP------
+        
     $ install virtual env (optional but recommended)
     // To start the virtual env:
     $ env/scripts/activate
