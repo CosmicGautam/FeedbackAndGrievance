@@ -1,22 +1,44 @@
-from django.shortcuts import render
-from rest_framework import viewsets, generics, permissions
+from rest_framework import viewsets, generics, permissions, serializers, status
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import State, Municipality, Department, Feedback, Grievance, GrievanceResponse
-from .serializers import StateSerializer, MunicipalitySerializer, FeedbackSerializer, GrievanceSerializer, GrievanceResponseSerializer
-from rest_framework import serializers
-from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from rest_framework import status
+from phonenumbers import parse, is_valid_number, format_number, PhoneNumberFormat, NumberParseException, region_code_for_number
+
+from .models import CustomUser, State, Municipality, Department, Feedback, Grievance, GrievanceResponse
+from .serializers import (
+    StateSerializer, MunicipalitySerializer,
+    FeedbackSerializer, GrievanceSerializer,
+    GrievanceResponseSerializer
+)
+
 
 class CustomRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    password1 = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
+    username = serializers.CharField(write_only=True)
+    dob = serializers.DateField(write_only=True)
+    password1 = serializers.CharField(write_only=True, min_length=8)
+    password2 = serializers.CharField(write_only=True, min_length=8)
+    address = serializers.CharField(write_only=True)
+    contact = serializers.CharField(write_only=True)
+
+    def validate_contact(self, value):
+        """
+        Validate phone number:
+        - Must be a valid Nepal number (+977).
+        - Normalizes to E.164 format (e.g., +9779812345678).
+        """
+        try:
+            phone = parse(value, "NP")
+            if not is_valid_number(phone):
+                raise serializers.ValidationError("Invalid Nepal phone number.")
+            if region_code_for_number(phone) != "NP":
+                raise serializers.ValidationError("Only Nepal (+977) phone numbers are allowed.")
+            return format_number(phone, PhoneNumberFormat.E164)
+        except NumberParseException:
+            raise serializers.ValidationError("Invalid phone number format. Use +977XXXXXXXXXX.")
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return value
 
@@ -26,15 +48,19 @@ class CustomRegisterSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['email'],  # Use email as username for compatibility
+        user = CustomUser.objects.create_user(
+            username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password1']
+            password=validated_data['password1'],
+            dob=validated_data['dob'],
+            contact=validated_data['contact'],  # already normalized to +977...
+            address=validated_data['address']
         )
-        # Assign user to Citizen group
-        citizen_group, created = Group.objects.get_or_create(name='Citizens')
+        # Assign user to Citizens group
+        citizen_group, _ = Group.objects.get_or_create(name='Citizens')
         user.groups.add(citizen_group)
         return user
+
 
 class CustomRegisterView(generics.CreateAPIView):
     serializer_class = CustomRegisterSerializer
@@ -50,10 +76,12 @@ class CustomRegisterView(generics.CreateAPIView):
             'refresh': str(token),
         }, status=status.HTTP_201_CREATED)
 
+
 class StateViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = State.objects.all()
     serializer_class = StateSerializer
     permission_classes = [permissions.AllowAny]
+
 
 class MunicipalityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Municipality.objects.all()
@@ -64,7 +92,8 @@ class MunicipalityViewSet(viewsets.ReadOnlyModelViewSet):
         state_id = self.request.query_params.get('state')
         if state_id:
             return Municipality.objects.filter(state_id=state_id)
-        return Municipality.objects.all()
+        return super().get_queryset()
+
 
 class FeedbackAPIView(generics.CreateAPIView):
     queryset = Feedback.objects.all()
@@ -72,13 +101,12 @@ class FeedbackAPIView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        municipality_id = self.kwargs['municipality_id']
-        department_id = self.kwargs['department_id']
         serializer.save(
             user=self.request.user,
-            municipality_id=municipality_id,
-            department_id=department_id
+            municipality_id=self.kwargs['municipality_id'],
+            department_id=self.kwargs['department_id']
         )
+
 
 class GrievanceAPIView(generics.CreateAPIView):
     queryset = Grievance.objects.all()
@@ -86,18 +114,18 @@ class GrievanceAPIView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        municipality_id = self.kwargs['municipality_id']
-        department_id = self.kwargs['department_id']
         serializer.save(
             user=self.request.user,
-            municipality_id=municipality_id,
-            department_id=department_id
+            municipality_id=self.kwargs['municipality_id'],
+            department_id=self.kwargs['department_id']
         )
+
 
 class GrievanceListAPIView(generics.ListAPIView):
     queryset = Grievance.objects.all()
     serializer_class = GrievanceSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 class GrievanceResponseAPIView(generics.CreateAPIView):
     queryset = GrievanceResponse.objects.all()
@@ -105,11 +133,11 @@ class GrievanceResponseAPIView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        grievance_id = self.kwargs['grievance_id']
         serializer.save(
             user=self.request.user,
-            grievance_id=grievance_id
+            grievance_id=self.kwargs['grievance_id']
         )
+
 
 class GrievanceStatusUpdateAPIView(generics.UpdateAPIView):
     queryset = Grievance.objects.all()
@@ -121,5 +149,4 @@ class GrievanceStatusUpdateAPIView(generics.UpdateAPIView):
         instance = self.get_object()
         instance.status = request.data.get('status', instance.status)
         instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response(self.get_serializer(instance).data)

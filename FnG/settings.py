@@ -15,17 +15,17 @@ SECRET_KEY = 'django-insecure-rh$$gd7acl*=$awcfq*-0c#oz7*v^dw^kn6qgshr339$)&_2+z
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = "base.CustomUser"
 SITE_ID = 1
 # Application definition
 INSTALLED_APPS = [
+    'base',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'base',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
