@@ -3050,3 +3050,16 @@ Method Not Allowed: /api/municipalities/1/departments/1/feedback/
 Method Not Allowed: /api/municipalities/1/departments/1/feedback/
 Method Not Allowed: /api/municipalities/1/departments/1/feedback/
 Method Not Allowed: /api/municipalities/1/departments/1/grievance/
+Watching for file changes with StatReloader
+Not Found: /
+Not Found: /favicon.ico
+Method Not Allowed: /api/municipalities/1/departments/1/grievance/
+Method Not Allowed: /api/municipalities/1/departments/1/feedback/
+Watching for file changes with StatReloader
+Method Not Allowed: /api/municipalities/1/departments/1/grievance/
+Not Found: /favicon.ico
+Method Not Allowed: /api/grievances/1/respond/
+Not Found: /token
+Method Not Allowed: /api/token/
+Unauthorized: /api/token/
+Unauthorized: /api/token/

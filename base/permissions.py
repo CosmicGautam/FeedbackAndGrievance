@@ -1,17 +1,22 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
+from django.contrib.auth.models import Group
 
-class IsCitizenOrOfficial(BasePermission):
+class IsOfficialForMunicipality(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in ['GET']:
-            return request.user.is_authenticated and (request.user.groups.filter(name='Officials').exists() or request.user.groups.filter(name='Citizens').exists())
-        elif request.method in ['POST', 'PUT', 'DELETE']:
-            return request.user.is_authenticated and request.user.groups.filter(name='Officials').exists()
-        return False
+        # Allow GET for all authenticated users (citizens and officials)
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.is_authenticated
+        # For POST/PATCH, check if user is in Officials group and has a municipality
+        if not request.user.is_authenticated:
+            return False
+        return request.user.groups.filter(name='Officials').exists() and request.user.municipality is not None
 
-class IsCitizen(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.groups.filter(name='Citizens').exists()
-
-class IsOfficial(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.groups.filter(name='Officials').exists()
+    def has_object_permission(self, request, view, obj):
+        # Allow GET for all authenticated users
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.is_authenticated
+        # For POST/PATCH, ensure the object's municipality matches the user's
+        return (
+            request.user.groups.filter(name='Officials').exists() and
+            request.user.municipality == obj.municipality
+        )

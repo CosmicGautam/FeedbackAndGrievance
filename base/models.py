@@ -6,17 +6,22 @@ class CustomUser(AbstractUser):
     dob = models.DateField(null=True, blank=True)
     contact = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
+    municipality = models.ForeignKey(
+        'Municipality',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users'
+    )  # Link user to a municipality (null for citizens)
 
     def __str__(self):
         return self.username
-
 
 class State(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
-
 
 class Municipality(models.Model):
     name = models.CharField(max_length=100)
@@ -25,7 +30,6 @@ class Municipality(models.Model):
     def __str__(self):
         return self.name
 
-
 class Department(models.Model):
     name = models.CharField(max_length=100)
     municipalities = models.ManyToManyField(Municipality, related_name='departments')
@@ -33,7 +37,6 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class Feedback(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -44,6 +47,8 @@ class Feedback(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Feedback {self.id} by {self.user}"
 
 class Grievance(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -53,13 +58,19 @@ class Grievance(models.Model):
     description = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=20, choices=[
-        ('OPEN', 'Open'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('RESOLVED', 'Resolved'),
-        ('CLOSED', 'Closed')
-    ], default='OPEN')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('OPEN', 'Open'),
+            ('IN_PROGRESS', 'In Progress'),
+            ('RESOLVED', 'Resolved'),
+            ('CLOSED', 'Closed')
+        ],
+        default='OPEN'
+    )
 
+    def __str__(self):
+        return self.title
 
 class GrievanceResponse(models.Model):
     grievance = models.ForeignKey(Grievance, on_delete=models.CASCADE, related_name='responses')
@@ -67,3 +78,6 @@ class GrievanceResponse(models.Model):
     response = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Response to {self.grievance}"

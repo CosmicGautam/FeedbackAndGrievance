@@ -1,16 +1,19 @@
 from rest_framework import serializers
 from .models import State, Municipality, Feedback, Grievance, GrievanceResponse, CustomUser
-from django.contrib.auth.models import Group
-
 
 class CustomRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    username = serializers.CharField(write_only=True)
-    dob = serializers.DateField(write_only=True)
+    username = serializers.CharField(required=True)
+    dob = serializers.DateField(required=True)
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
-    address = serializers.CharField(write_only=True)
-    contact = serializers.CharField(write_only=True)
+    address = serializers.CharField(required=True)
+    contact = serializers.CharField(required=True)
+    municipality = serializers.PrimaryKeyRelatedField(
+        queryset=Municipality.objects.all(),
+        required=False,
+        allow_null=True
+    )  # Optional for all users during registration
 
     def validate(self, attrs):
         if attrs['password1'] != attrs['password2']:
@@ -24,10 +27,9 @@ class CustomRegisterSerializer(serializers.Serializer):
             password=validated_data['password1'],
             dob=validated_data['dob'],
             contact=validated_data['contact'],
-            address=validated_data['address']
+            address=validated_data['address'],
+            municipality=validated_data.get('municipality')
         )
-        citizen_group, created = Group.objects.get_or_create(name='Citizens')
-        user.groups.add(citizen_group)
         return user
 
 class StateSerializer(serializers.ModelSerializer):
@@ -38,7 +40,7 @@ class StateSerializer(serializers.ModelSerializer):
 class MunicipalitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Municipality
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'state']
 
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
